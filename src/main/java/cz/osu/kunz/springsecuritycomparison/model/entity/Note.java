@@ -1,6 +1,7 @@
 package cz.osu.kunz.springsecuritycomparison.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ public class Note {
     private UUID id;
 
     @Column(length = 1000)
+    @Size(max = 1000)
     private String content;
 
     @Column(nullable = false)

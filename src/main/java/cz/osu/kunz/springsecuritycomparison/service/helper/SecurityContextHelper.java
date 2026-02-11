@@ -24,5 +24,6 @@ public class SecurityContextHelper {
         return auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(a -> a.equals("ROLE_ADMIN") || a.equals("ADMIN"));
+        //TODO: maybe change the roleName if It is named somehow differently
     }
 }
