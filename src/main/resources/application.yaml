@@ -3,7 +3,7 @@ spring:
     name: spring-security-comparison
 
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:security_comparison_db
     driverClassName: org.h2.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
