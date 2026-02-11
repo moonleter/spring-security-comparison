@@ -15,4 +15,6 @@ public interface NoteService {
     NoteReadDto editNote(UUID noteId, NoteEditDto noteEditDto);
 
     void deleteNote(UUID noteId);
+
+    List<NoteReadDto> getAllUsersNotesAsAdmin();
 }

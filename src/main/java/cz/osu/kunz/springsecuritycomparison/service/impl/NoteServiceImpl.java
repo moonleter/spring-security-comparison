@@ -98,7 +98,20 @@ public class NoteServiceImpl implements NoteService {
         accessLogService.logAccess(currentUsername, "DELETE_NOTE", protocolResolver.getCurrentProtocol(), true);
     }
 
-    // TODO: add admin method view, that view’s  all user’s notes
+    public List<NoteReadDto> getAllUsersNotesAsAdmin() {
+        if (!securityContextHelper.isCurrentUserAdmin()) {
+            String currentUsername = securityContextHelper.getCurrentUsername();
+            accessLogService.logAccess(currentUsername, "GET_ALL_NOTES_UNAUTHORIZED", protocolResolver.getCurrentProtocol(), false);
+            throw new AccessDeniedException("You do not have permission to view all notes.");
+        }
+
+        accessLogService.logAccess(securityContextHelper.getCurrentUsername(), "GET_ALL_NOTES", protocolResolver.getCurrentProtocol(), true);
+
+        return noteMapper.notesToNoteReadDtos(
+                noteRepository.findAll(),
+                new CycleAvoidingMappingContext()
+        );
+    }
 }
 
 
