@@ -1,5 +1,10 @@
 package cz.osu.kunz.springsecuritycomparison.service.impl;
 
+import cz.osu.kunz.springsecuritycomparison.mapper.CycleAvoidingMappingContext;
+import cz.osu.kunz.springsecuritycomparison.mapper.NoteMapper;
+import cz.osu.kunz.springsecuritycomparison.model.dto.NoteCreateDto;
+import cz.osu.kunz.springsecuritycomparison.model.dto.NoteEditDto;
+import cz.osu.kunz.springsecuritycomparison.model.dto.NoteReadDto;
 import cz.osu.kunz.springsecuritycomparison.model.entity.Note;
 import cz.osu.kunz.springsecuritycomparison.repository.NoteRepository;
 import cz.osu.kunz.springsecuritycomparison.service.AccessLogService;
@@ -10,10 +15,10 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,18 +30,19 @@ public class NoteServiceImpl implements NoteService {
     private final NoteMapper noteMapper;
 
     public List<NoteReadDto> getCurrentUserNotes() {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUsername = securityContextHelper.getCurrentUsername();
         accessLogService.logAccess(currentUsername, "GET_NOTES", protocolResolver.getCurrentProtocol(), true);
 
-        return noteRepository.findAllByOwnerUsername(currentUsername)
-                .stream()
-                .map(n -> new NoteReadDto(n.getId(), n.getContent(), n.getOwnerUsername(), n.getCreatedAt()))
-                .toList();
+
+        return noteMapper.notesToNoteReadDtos(
+                noteRepository.findAllByOwnerUsername(currentUsername),
+                new CycleAvoidingMappingContext()
+        );
     }
 
     @Transactional
     public NoteReadDto createNote(NoteCreateDto noteCreateDto) {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUsername = securityContextHelper.getCurrentUsername();
 
         Note note = new Note();
         note.setContent(noteCreateDto.getContent());
@@ -44,18 +50,17 @@ public class NoteServiceImpl implements NoteService {
         Note savedNote = noteRepository.save(note);
 
         accessLogService.logAccess(currentUsername, "CREATE_NOTE", protocolResolver.getCurrentProtocol(), true);
-        return noteMapper.mapNoteToNoteReadDto(savedNote);
+        return noteMapper.noteToNoteReadDto(savedNote, new CycleAvoidingMappingContext());
     }
 
     @Transactional
-    public NoteReadDto editNote(NoteEditDto noteEditDto) {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+    public NoteReadDto editNote(UUID noteId, NoteEditDto noteEditDto) {
+        String currentUsername = securityContextHelper.getCurrentUsername();
 
-        Note note = noteRepository.findById(noteEditDto.getId())
+        Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new EntityNotFoundException("Note not found"));
 
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN"));
+        boolean isAdmin = securityContextHelper.isCurrentUserAdmin();
 
         if (!note.getOwnerUsername().equals(currentUsername) && !isAdmin) {
 
@@ -69,18 +74,17 @@ public class NoteServiceImpl implements NoteService {
 
         accessLogService.logAccess(currentUsername, "EDIT_NOTE", protocolResolver.getCurrentProtocol(), true);
 
-        return noteMapper.mapNoteToNoteReadDto(savedNote);
+        return noteMapper.noteToNoteReadDto(savedNote, new CycleAvoidingMappingContext());
     }
 
     @Transactional
-    public void deleteNote(NoteDeleteDto noteDeleteDto) {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+    public void deleteNote(UUID noteId) {
+        String currentUsername = securityContextHelper.getCurrentUsername();
 
-        Note note = noteRepository.findById(noteDeleteDto.getId())
+        Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new EntityNotFoundException("Note not found"));
 
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ADMIN"));
+        boolean isAdmin = securityContextHelper.isCurrentUserAdmin();
 
         if (!note.getOwnerUsername().equals(currentUsername) && !isAdmin) {
 
@@ -93,4 +97,8 @@ public class NoteServiceImpl implements NoteService {
 
         accessLogService.logAccess(currentUsername, "DELETE_NOTE", protocolResolver.getCurrentProtocol(), true);
     }
+
+    // TODO: add admin method view, that view’s  all user’s notes
 }
+
+
