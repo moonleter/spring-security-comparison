@@ -10,7 +10,7 @@ import cz.osu.kunz.springsecuritycomparison.repository.NoteRepository;
 import cz.osu.kunz.springsecuritycomparison.service.AccessLogService;
 import cz.osu.kunz.springsecuritycomparison.service.NoteService;
 import cz.osu.kunz.springsecuritycomparison.service.helper.ProtocolResolver;
-import cz.osu.kunz.springsecuritycomparison.service.helper.SecurityContextHelper;
+import cz.osu.kunz.springsecuritycomparison.security.SecurityContextHelper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
