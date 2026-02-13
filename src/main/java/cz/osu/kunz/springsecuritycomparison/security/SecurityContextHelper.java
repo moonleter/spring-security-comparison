@@ -1,4 +1,4 @@
-package cz.osu.kunz.springsecuritycomparison.service.helper;
+package cz.osu.kunz.springsecuritycomparison.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,6 +13,18 @@ public class SecurityContextHelper {
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("No authenticated user found");
         }
+
+        //TODO: impl later when implementing each protocols
+        // OIDC (OAuth2)
+//        if (auth instanceof JwtAuthenticationToken jwtAuth) {
+//            // Keycloak ukládá čitelné uživatelské jméno do claimu "preferred_username"
+//            return (String) jwtAuth.getTokenAttributes().getOrDefault("preferred_username", auth.getName());
+//        }
+//        //  SAML
+//        else if (auth instanceof Saml2Authentication samlAuth) {
+//            return samlAuth.getName();
+//        }
+
         return auth.getName();
     }
 
