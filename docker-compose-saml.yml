@@ -1,0 +1,40 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5
+    container_name: demo-keycloak
+    env_file:
+      - .env
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    command: start-dev --import-realm
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - security-net
+
+  spring-app-saml:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PROFILE=saml
+    container_name: demo-spring-saml
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=saml
+      - SERVER_PORT=8080
+      - KEYCLOAK_URL=http://keycloak:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak
+    networks:
+      - security-net
+
+networks:
+  security-net:
+    driver: bridge
