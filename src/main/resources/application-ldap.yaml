@@ -1,0 +1,17 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  ldap:
+    urls: ${LDAP_URL:ldap://demo-openldap:1389}
+    base: "dc=osu,dc=cz"
+    username: ${LDAP_ADMIN_DN:cn=admin,dc=osu,dc=cz}
+    password: ${LDAP_ADMIN_PASSWORD}
+
+app:
+  security:
+    ldap:
+      user-search-base: "ou=users"
+      user-search-filter: "(uid={0})"
+      group-search-base: "ou=groups"
+      group-search-filter: "(uniqueMember={0})"

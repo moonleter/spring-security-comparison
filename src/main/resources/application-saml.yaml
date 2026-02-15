@@ -1,0 +1,12 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          keycloak:
+            entity-id: "{baseUrl}/saml2/service-provider-metadata/{registrationId}"
+            assertingparty:
+              metadata-uri: ${KEYCLOAK_URL:http://demo-keycloak:8080}/realms/diplomka/protocol/saml/descriptor
