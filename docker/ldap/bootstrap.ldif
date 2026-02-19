@@ -1,0 +1,50 @@
+dn: ou=users,dc=osu,dc=cz
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=osu,dc=cz
+objectClass: organizationalUnit
+ou: groups
+
+# ADMIN
+dn: uid=admin,ou=users,dc=osu,dc=cz
+objectClass: inetOrgPerson
+objectClass: top
+cn: Admin
+sn: User
+uid: admin
+userPassword: ${LDAP_ADMIN_PASSWORD}
+
+# BOB
+dn: uid=bob,ou=users,dc=osu,dc=cz
+objectClass: inetOrgPerson
+objectClass: top
+cn: Bob
+sn: User
+uid: bob
+userPassword: ${LDAP_USER_PASSWORD1}
+
+# ALICE
+dn: uid=alice,ou=users,dc=osu,dc=cz
+objectClass: inetOrgPerson
+objectClass: top
+cn: Alice
+sn: Smith
+uid: alice
+userPassword: ${LDAP_USER_PASSWORD2}
+
+
+# Assign roles
+dn: cn=ADMIN,ou=groups,dc=osu,dc=cz
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ADMIN
+uniqueMember: uid=admin,ou=users,dc=osu,dc=cz
+
+
+dn: cn=USER,ou=groups,dc=osu,dc=cz
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: USER
+uniqueMember: uid=bob,ou=users,dc=osu,dc=cz
+uniqueMember: uid=alice,ou=users,dc=osu,dc=cz

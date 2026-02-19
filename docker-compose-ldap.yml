@@ -9,11 +9,15 @@ services:
       - LDAP_ORGANISATION=OSU
       - LDAP_DOMAIN=osu.cz
       - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_USER_PASSWORD1=${LDAP_USER_PASSWORD1}
+      - LDAP_USER_PASSWORD2=${LDAP_USER_PASSWORD2}
       - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
     ports:
       - "1389:389"
     volumes:
-      - ./docker/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+      - ./docker/ldap/bootstrap.ldif:/ldif-templates/bootstrap.ldif:ro
+      - ./docker/ldap/init.sh:/init.sh:ro
+    entrypoint: [ "/bin/bash", "/init.sh" ]
     networks:
       - security-net
 
