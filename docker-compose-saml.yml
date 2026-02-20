@@ -7,6 +7,10 @@ services:
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_USER_PASSWORD1=${LDAP_USER_PASSWORD1}
+      - LDAP_USER_PASSWORD2=${LDAP_USER_PASSWORD2}
+      - JAVA_OPTS_APPEND=-Dkeycloak.migration.replace-placeholders=true
     command: start-dev --import-realm
     ports:
       - "8081:8080"

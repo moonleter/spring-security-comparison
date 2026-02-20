@@ -8,5 +8,9 @@ spring:
         registration:
           keycloak:
             entity-id: "{baseUrl}/saml2/service-provider-metadata/{registrationId}"
+            signing:
+              credentials:
+                - private-key-location: "classpath:credentials/saml-private.key"
+                  certificate-location: "classpath:credentials/saml-public.crt"
             assertingparty:
               metadata-uri: ${KEYCLOAK_URL:http://demo-keycloak:8080}/realms/diplomka/protocol/saml/descriptor
