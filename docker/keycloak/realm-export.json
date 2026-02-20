@@ -2689,44 +2689,56 @@
   "users": [
     {
       "username": "admin",
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@osu.cz",
       "enabled": true,
       "credentials": [
         {
           "type": "password",
-          "value": "${env.LDAP_ADMIN_PASSWORD}",
+          "value": "${KEYCLOAK_ADMIN_PASSWORD}",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "ADMIN"
+        "ADMIN",
+        "default-roles-osu"
       ]
     },
     {
       "username": "bob",
+      "firstName": "Bob",
+      "lastName": "User",
+      "email": "bob@osu.cz",
       "enabled": true,
       "credentials": [
         {
           "type": "password",
-          "value": "${env.LDAP_USER_PASSWORD1}",
+          "value": "${LDAP_USER_PASSWORD1}",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "USER"
+        "USER",
+        "default-roles-osu"
       ]
     },
     {
       "username": "alice",
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "email": "alice@osu.cz",
       "enabled": true,
       "credentials": [
         {
           "type": "password",
-          "value": "${env.LDAP_USER_PASSWORD2}",
+          "value": "${LDAP_USER_PASSWORD2}",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "USER"
+        "USER",
+        "default-roles-osu"
       ]
     }
   ]
