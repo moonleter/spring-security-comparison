@@ -14,5 +14,5 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
-            issuer-uri: ${KEYCLOAK_URL:http://demo-keycloak:8080}/realms/diplomka
+            issuer-uri: ${KEYCLOAK_URL:http://demo-keycloak:8080}/realms/osu
             user-name-attribute: preferred_username
