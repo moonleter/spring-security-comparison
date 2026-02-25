@@ -13,18 +13,19 @@ public class SecurityContextHelper {
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("No authenticated user found");
         }
+//TODO: change to switch
+        // 1. OIDC (OAuth2)
+        if (auth instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwtAuth) {
+            return (String) jwtAuth.getTokenAttributes().getOrDefault("preferred_username", auth.getName());
+        } else if (auth instanceof org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken oauth2Auth) {
+            return (String) oauth2Auth.getPrincipal().getAttributes().getOrDefault("preferred_username", auth.getName());
+        }
+        // 2. SAML 2.0
+        else if (auth instanceof org.springframework.security.saml2.provider.service.authentication.Saml2Authentication samlAuth) {
+            return samlAuth.getName(); // Spring automaticky vytáhne NameID
+        }
 
-        //TODO: impl later when implementing each protocols
-        // OIDC (OAuth2)
-//        if (auth instanceof JwtAuthenticationToken jwtAuth) {
-//            // Keycloak ukládá čitelné uživatelské jméno do claimu "preferred_username"
-//            return (String) jwtAuth.getTokenAttributes().getOrDefault("preferred_username", auth.getName());
-//        }
-//        //  SAML
-//        else if (auth instanceof Saml2Authentication samlAuth) {
-//            return samlAuth.getName();
-//        }
-
+        // 3. LDAP
         return auth.getName();
     }
 
