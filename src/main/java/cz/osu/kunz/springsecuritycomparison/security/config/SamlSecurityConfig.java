@@ -84,7 +84,7 @@ public class SamlSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/notes/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/notes/**").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .saml2Login(saml2 -> saml2
                         .defaultSuccessUrl("/swagger-ui/index.html", true)
