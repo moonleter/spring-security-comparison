@@ -1,6 +1,5 @@
 services:
   keycloak:
-    # https://github.com/osixia/docker-openldap
     image: quay.io/keycloak/keycloak:26.5
     container_name: demo-keycloak
     env_file:
@@ -12,6 +11,7 @@ services:
       - LDAP_USER_PASSWORD1=${LDAP_USER_PASSWORD1}
       - LDAP_USER_PASSWORD2=${LDAP_USER_PASSWORD2}
       - JAVA_OPTS_APPEND=-Dkeycloak.migration.replace-placeholders=true
+      - KC_HOSTNAME_URL=http://localhost:8081
     command: start-dev --import-realm
     ports:
       - "8081:8080"
@@ -27,6 +27,7 @@ services:
       args:
         - PROFILE=oidc
     container_name: demo-spring-oidc
+    restart: on-failure
     env_file:
       - .env
     environment:
