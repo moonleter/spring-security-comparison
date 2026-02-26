@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.jwt.*;
@@ -71,10 +72,10 @@ public class OidcSecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri("http://keycloak:8080/realms/osu/protocol/openid-connect/certs")
-                .build();
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri("http://keycloak:8080/realms/osu/protocol/openid-connect/certs").build();
 
-        jwtDecoder.setJwtValidator(token -> OAuth2TokenValidatorResult.success());
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer("http://localhost:8081/realms/osu");
+        jwtDecoder.setJwtValidator(withIssuer);
 
         return jwtDecoder;
     }
@@ -82,7 +83,10 @@ public class OidcSecurityConfig {
     @Bean
     public JwtDecoderFactory<ClientRegistration> jwtDecoderFactory() {
         OidcIdTokenDecoderFactory factory = new OidcIdTokenDecoderFactory();
-        factory.setJwtValidatorFactory(clientRegistration -> token -> OAuth2TokenValidatorResult.success());
+
+        factory.setJwtValidatorFactory(clientRegistration ->
+                JwtValidators.createDefaultWithIssuer("http://localhost:8081/realms/osu"));
+
         return factory;
     }
 
