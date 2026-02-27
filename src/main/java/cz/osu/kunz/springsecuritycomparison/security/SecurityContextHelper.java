@@ -8,26 +8,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class SecurityContextHelper {
 
+    /**
+     * @return Returns current username based on the authentication type. It checks for JWT, OAuth2, and SAML.
+     */
     public String getCurrentUsername() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             throw new IllegalStateException("No authenticated user found");
         }
-//TODO: change to switch
-        // 1. OIDC (OAuth2)
-        if (auth instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwtAuth) {
-            return (String) jwtAuth.getTokenAttributes().getOrDefault("preferred_username", auth.getName());
-        } else if (auth instanceof org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken oauth2Auth) {
-            return (String) oauth2Auth.getPrincipal().getAttributes().getOrDefault("preferred_username", auth.getName());
-        }
-        // 2. SAML 2.0
-        else if (auth instanceof org.springframework.security.saml2.provider.service.authentication.Saml2Authentication samlAuth) {
-            return samlAuth.getName(); // Spring automaticky vytáhne NameID
-        }
 
-        // 3. LDAP
-        return auth.getName();
+        return switch (auth) {
+            case org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken jwtAuth ->
+                    (String) jwtAuth.getTokenAttributes().getOrDefault("preferred_username", auth.getName());
+            case org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken oauth2Auth ->
+                    (String) oauth2Auth.getPrincipal().getAttributes().getOrDefault("preferred_username", auth.getName());
+            case org.springframework.security.saml2.provider.service.authentication.Saml2Authentication samlAuth ->
+                    samlAuth.getName();
+            default -> auth.getName();
+        };
     }
+
 
     public boolean isCurrentUserAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -37,6 +37,5 @@ public class SecurityContextHelper {
         return auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(a -> a.equals("ROLE_ADMIN") || a.equals("ADMIN"));
-        //TODO: maybe change the roleName if It is named somehow differently
     }
 }
