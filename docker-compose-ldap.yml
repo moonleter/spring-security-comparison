@@ -1,0 +1,46 @@
+services:
+  openldap:
+    # https://github.com/osixia/docker-openldap
+    image: osixia/openldap:1.5.0
+    container_name: demo-openldap
+    env_file:
+      - .env
+    environment:
+      - LDAP_ORGANISATION=OSU
+      - LDAP_DOMAIN=osu.cz
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_USER_PASSWORD1=${LDAP_USER_PASSWORD1}
+      - LDAP_USER_PASSWORD2=${LDAP_USER_PASSWORD2}
+      - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
+    ports:
+      - "1389:389"
+    volumes:
+      - ./docker/ldap/bootstrap.ldif:/ldif-templates/bootstrap.ldif:ro
+      - ./docker/ldap/init.sh:/init.sh:ro
+    entrypoint: [ "/bin/bash", "/init.sh" ]
+    networks:
+      - security-net
+
+  spring-app-ldap:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PROFILE=ldap
+    container_name: demo-spring-ldap
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=ldap
+      - SERVER_PORT=8080
+      - LDAP_URL=ldap://demo-openldap:389
+    ports:
+      - "8080:8080"
+    depends_on:
+      - openldap
+    networks:
+      - security-net
+
+networks:
+  security-net:
+    driver: bridge

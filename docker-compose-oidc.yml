@@ -1,0 +1,46 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5
+    container_name: demo-keycloak
+    env_file:
+      - .env
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_USER_PASSWORD1=${LDAP_USER_PASSWORD1}
+      - LDAP_USER_PASSWORD2=${LDAP_USER_PASSWORD2}
+      - JAVA_OPTS_APPEND=-Dkeycloak.migration.replace-placeholders=true
+      - KC_HOSTNAME_URL=http://localhost:8081
+    command: start-dev --import-realm
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - security-net
+
+  spring-app-oidc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PROFILE=oidc
+    container_name: demo-spring-oidc
+    restart: on-failure
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=oidc
+      - SERVER_PORT=8080
+      - KEYCLOAK_URL=http://keycloak:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak
+    networks:
+      - security-net
+
+networks:
+  security-net:
+    driver: bridge
