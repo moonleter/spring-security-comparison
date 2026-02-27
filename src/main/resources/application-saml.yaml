@@ -8,10 +8,8 @@ spring:
       relyingparty:
         registration:
           keycloak:
-            entity-id: "{baseUrl}/saml2/service-provider-metadata/{registrationId}"
+            entity-id: "spring-boot-saml-client"
             signing:
               credentials:
                 - private-key-location: "classpath:credentials/saml-private.key"
                   certificate-location: "classpath:credentials/saml-public.crt"
-            assertingparty:
-              metadata-uri: ${KEYCLOAK_URL:http://keycloak:8080}/realms/osu/protocol/saml/descriptor
