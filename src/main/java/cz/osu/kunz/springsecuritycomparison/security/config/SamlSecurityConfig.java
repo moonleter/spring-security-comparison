@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -13,9 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.saml2.core.Saml2X509Credential;
-import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider;
-import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
-import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
+import org.springframework.security.saml2.provider.service.authentication.*;
 import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
@@ -85,27 +84,32 @@ public class SamlSecurityConfig {
     }
 
     @Bean
-    @SuppressWarnings("deprecation")
     public OpenSaml5AuthenticationProvider samlAuthenticationProvider() {
         OpenSaml5AuthenticationProvider provider = new OpenSaml5AuthenticationProvider();
 
-        OpenSaml5AuthenticationProvider.ResponseAuthenticationConverter delegate =
-                new OpenSaml5AuthenticationProvider.ResponseAuthenticationConverter();
+        Converter<OpenSaml5AuthenticationProvider.ResponseToken, Saml2Authentication> delegate =
+                OpenSaml5AuthenticationProvider.createDefaultResponseAuthenticationConverter();
 
         provider.setResponseAuthenticationConverter(responseToken -> {
-            Saml2Authentication authentication = delegate.convert(responseToken);
 
-            Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
+            Saml2AssertionAuthentication authentication = (Saml2AssertionAuthentication) delegate.convert(responseToken);
+
+            Saml2ResponseAssertionAccessor assertionAccessor = authentication.getCredentials();
             Set<GrantedAuthority> authorities = new HashSet<>(authentication.getAuthorities());
 
-            if (principal != null) {
-                List<Object> roles = principal.getAttribute("roles");
+            if (assertionAccessor != null) {
+                List<Object> roles = assertionAccessor.getAttribute("roles");
                 if (roles != null) {
                     roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.toString().toUpperCase())));
                 }
             }
 
-            return new Saml2Authentication(principal, authentication.getSaml2Response(), authorities);
+            return new Saml2AssertionAuthentication(
+                    authentication.getPrincipal(),
+                    assertionAccessor,
+                    authorities,
+                    authentication.getRelyingPartyRegistrationId()
+            );
         });
 
         return provider;
